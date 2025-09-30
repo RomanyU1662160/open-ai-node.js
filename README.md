@@ -19,7 +19,7 @@ A robust Express.js server built with TypeScript, featuring OpenAI integration, 
 
 - Node.js (v18 or higher)
 - npm or yarn
-- OpenAI API key (for AI features)
+-  <OPEN_API_key> (for AI features)
 
 ### Installation
 

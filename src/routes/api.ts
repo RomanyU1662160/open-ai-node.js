@@ -1,6 +1,7 @@
-import { Router, Request, Response } from 'express';
+import { Request, Response, Router } from 'express';
+import { OpenaiController } from '../controllers/openai.controller';
+import { OpenAIRequestBodySchema, OpenAIResponse } from '../schemas/openai';
 import logger from '../utils/logger';
-import { getChatResponse } from '../clients/openai';
 
 const apiRouter = Router();
 
@@ -113,34 +114,40 @@ apiRouter.get('/status', (req: Request, res: Response) => {
  *             schema:
  *               $ref: '#/components/schemas/Error'
  */
-apiRouter.post('/chat', async (req: Request, res: Response) => {
-  try {
-    logger.debug('Chat endpoint accessed');
-    const { message } = req.body;
+apiRouter.post(
+  '/chat',
+  async (
+    req: Request,
+    res: Response
+  ): Promise<Response<OpenAIResponse> | undefined> => {
+    try {
+      logger.debug('Chat endpoint accessed');
+      const { message, conversationId } = req.body;
 
-    if (!message) {
-      res.status(400).json({
-        error: 'Message is required',
-        example: { message: 'What is the capital of England?' },
+      const validation = OpenAIRequestBodySchema.safeParse(req.body);
+
+      if (!validation.success) {
+        logger.error('Invalid chat request body:', validation.error.issues);
+        return res.status(400).json({
+          error: 'Invalid request body',
+          issues: validation.error.issues,
+        });
+      }
+
+      logger.info(`Processing chat request: ${message.substring(0, 50)}...`);
+      const response = await OpenaiController.getChatResponse(
+        message,
+        conversationId
+      );
+
+      return res.status(200).json(response);
+    } catch (error) {
+      logger.error('Chat endpoint error:', error);
+      return res.status(500).json({
+        error: 'Failed to get chat response',
+        message: error instanceof Error ? error.message : 'Unknown error',
       });
-      return;
     }
-
-    logger.info(`Processing chat request: ${message.substring(0, 50)}...`);
-    const response = await getChatResponse(message);
-
-    res.status(200).json({
-      question: message,
-      answer: response,
-      model:
-        process.env.OPENAI_MODEL || 'meta-llama/Meta-Llama-3.1-8B-Instruct',
-    });
-  } catch (error) {
-    logger.error('Chat endpoint error:', error);
-    res.status(500).json({
-      error: 'Failed to get chat response',
-      message: error instanceof Error ? error.message : 'Unknown error',
-    });
   }
-});
+);
 export default apiRouter;

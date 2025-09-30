@@ -67,6 +67,12 @@ export const commonSchemas = {
         description: 'The message to send to the AI',
         minLength: 1,
         maxLength: 1000,
+        required: true,
+      },
+      conversationId: {
+        type: 'string',
+        description: 'conversation ID for context',
+        required: true,
       },
       temperature: {
         type: 'number',
@@ -80,13 +86,14 @@ export const commonSchemas = {
         minimum: 1,
         maximum: 4000,
         description: 'Maximum number of tokens in the response',
-        default: 1000,
+        default: 100,
       },
     },
     example: {
       message: 'What is the capital of England?',
+      conversationId: 'conv_689667905b048191b4740501625afd940c7533ace33a2dab',
       temperature: 0.7,
-      maxTokens: 1000,
+      maxTokens: 100,
     },
   },
 
@@ -104,6 +111,10 @@ export const commonSchemas = {
       model: {
         type: 'string',
         description: 'The AI model used',
+      },
+      total_token: {
+        type: 'integer',
+        description: 'Total tokens used in the response',
       },
       timestamp: {
         type: 'string',
@@ -129,7 +140,6 @@ export const commonSchemas = {
       },
     },
     example: {
-      question: 'What is the capital of England?',
       answer: 'The capital of England is London.',
       model: 'meta-llama/Meta-Llama-3.1-8B-Instruct',
       timestamp: '2025-09-29T02:00:00.000Z',
