@@ -12,9 +12,16 @@ export const OpenaiService = {
       input: [{ role: 'user', content: content }],
       store: true,
       previous_response_id: OpenAiRepo.getLastResponseId(conversationId),
+      max_output_tokens: 2000,
+      tools: [
+        {
+          type: 'web_search_2025_08_26',
+        },
+      ],
+      //service_tier: 'flex', // flex for low cost with low latency, standard for better performance
     });
     OpenAiRepo.setLastResponseId(conversationId, response.id);
-    console.log('response:::>>>', JSON.stringify(response, null, 2));
+
     return response;
   },
 };
